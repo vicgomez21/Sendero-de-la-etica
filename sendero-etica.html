@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sendero Ético — Prototipo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#bfe7ff;
+    --sky-bottom:#eaf9ff;
+    --ink:#1f2a44;
+    --ink-soft:#4a5578;
+    --path-line:#2b3560;
+    --card-bg:#ffffff;
+    --card-shadow: 0 14px 0 rgba(43,53,96,0.18);
+    --locked-fill:#c7d2e0;
+    --locked-ink:#8291ab;
+    --c-teal:#1fb6a6;
+    --c-teal-dark:#0d8c7e;
+    --c-coral:#ff6b6b;
+    --c-coral-dark:#e14b4b;
+    --c-sun:#ffb703;
+    --c-sun-dark:#e39400;
+    --c-purple:#8b6fd6;
+    --c-purple-dark:#6c4fc0;
+    --c-sky:#3aa0ff;
+    --c-sky-dark:#1b7fe0;
+    --c-pink:#ff5fa2;
+    --c-pink-dark:#e0407f;
+    --c-green:#3fc97a;
+    --c-green-dark:#22a25c;
+    --focus-ring: 0 0 0 3px #fff, 0 0 0 6px #1f2a44;
+  }
+
+  :root:not([data-theme="light"]){
+    @media (prefers-color-scheme: dark){
+      --sky-top:#0d1b33;
+      --sky-bottom:#152544;
+      --ink:#f2f5ff;
+      --ink-soft:#c4cce4;
+      --card-bg:#1c2743;
+      --card-shadow: 0 14px 0 rgba(0,0,0,0.35);
+      --locked-fill:#33405e;
+      --locked-ink:#8b96b7;
+      --path-line:#aeb8dd;
+    }
+  }
+  :root[data-theme="dark"]{
+    --sky-top:#0d1b33;
+    --sky-bottom:#152544;
+    --ink:#f2f5ff;
+    --ink-soft:#c4cce4;
+    --card-bg:#1c2743;
+    --card-shadow: 0 14px 0 rgba(0,0,0,0.35);
+    --locked-fill:#33405e;
+    --locked-ink:#8b96b7;
+    --path-line:#aeb8dd;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Nunito', sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(ellipse 60% 30% at 15% 8%, rgba(255,255,255,0.55), transparent 60%),
+      radial-gradient(ellipse 50% 25% at 85% 4%, rgba(255,255,255,0.4), transparent 60%),
+      linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 55%, var(--sky-bottom) 100%);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+
+  /* ---------- decorative floating shapes ---------- */
+  .cloud{
+    position:absolute;
+    background:#fff;
+    border-radius:50%;
+    opacity:0.75;
+    filter:blur(0.5px);
+  }
+  :root[data-theme="dark"] .cloud, @media (prefers-color-scheme: dark){ .cloud{opacity:0.12;} }
+
+  .spark{
+    position:absolute;
+    font-size:22px;
+    opacity:0.6;
+    animation:float 6s ease-in-out infinite;
+    user-select:none;
+    pointer-events:none;
+  }
+  @keyframes float{
+    0%,100%{ transform:translateY(0px) rotate(0deg); }
+    50%{ transform:translateY(-14px) rotate(8deg); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .spark{ animation:none; }
+  }
+
+  /* ---------- header ---------- */
+  header{
+    position:relative;
+    text-align:center;
+    padding:52px 20px 18px;
+    z-index:2;
+  }
+  .eyebrow-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:var(--card-bg);
+    color:var(--c-purple-dark);
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    padding:8px 18px;
+    border-radius:999px;
+    box-shadow: 0 6px 0 rgba(43,53,96,0.15);
+    margin-bottom:18px;
+  }
+  h1{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:800;
+    font-size:clamp(32px, 6vw, 54px);
+    line-height:1.05;
+    margin:0 0 12px;
+    color:var(--ink);
+  }
+  h1 span{
+    display:block;
+    color:var(--c-teal-dark);
+  }
+  header p{
+    max-width:520px;
+    margin:0 auto;
+    color:var(--ink-soft);
+    font-size:17px;
+    font-weight:600;
+    line-height:1.5;
+  }
+
+  .progress-wrap{
+    max-width:360px;
+    margin:26px auto 0;
+    text-align:left;
+  }
+  .progress-label{
+    font-family:'Baloo 2', sans-serif;
+    font-size:14px;
+    font-weight:700;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+    display:flex;
+    justify-content:space-between;
+  }
+  .progress-track{
+    height:14px;
+    background:rgba(43,53,96,0.12);
+    border-radius:999px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    width:12.5%;
+    background:linear-gradient(90deg, var(--c-teal), var(--c-green));
+    border-radius:999px;
+    transition:width .6s ease;
+  }
+
+  /* ---------- path ---------- */
+  .path-region{
+    position:relative;
+    max-width:640px;
+    margin:40px auto 0;
+    padding:20px 20px 80px;
+    z-index:2;
+  }
+  svg#pathSvg{
+    position:absolute;
+    top:0; left:0;
+    width:100%;
+    height:100%;
+    z-index:0;
+    pointer-events:none;
+  }
+  .nodes-col{
+    position:relative;
+    z-index:1;
+    display:flex;
+    flex-direction:column;
+    gap:64px;
+  }
+  .node-row{
+    display:flex;
+  }
+  .node-row.align-left{ justify-content:flex-start; }
+  .node-row.align-right{ justify-content:flex-end; }
+  .node-row.align-center{ justify-content:center; }
+
+  .node{
+    position:relative;
+    width:112px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    background:none;
+    border:none;
+    cursor:pointer;
+    font-family:'Baloo 2', sans-serif;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .node:focus-visible .bubble{
+    box-shadow: var(--focus-ring), var(--bubble-shadow);
+  }
+  .bubble{
+    width:92px;
+    height:92px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:34px;
+    font-weight:800;
+    color:#fff;
+    position:relative;
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .node.unlocked .bubble{
+    background: radial-gradient(circle at 32% 28%, var(--bubble-light), var(--bubble-base) 60%);
+    box-shadow: var(--bubble-shadow);
+  }
+  .node.unlocked:hover .bubble,
+  .node.unlocked:focus-visible .bubble{
+    transform: translateY(-6px) scale(1.04);
+  }
+  .node.unlocked:active .bubble{
+    transform: translateY(-1px) scale(0.98);
+  }
+  .node.locked .bubble{
+    background:var(--locked-fill);
+    color:var(--locked-ink);
+    box-shadow: 0 8px 0 rgba(43,53,96,0.10);
+    cursor:not-allowed;
+  }
+  .node.locked{ cursor:not-allowed; }
+
+  .ring{
+    position:absolute;
+    inset:-7px;
+    border-radius:50%;
+    border:3px dashed rgba(255,255,255,0.65);
+  }
+  .node.locked .ring{ display:none; }
+
+  .lock-icon{
+    position:absolute;
+    bottom:-2px;
+    right:-2px;
+    width:32px;
+    height:32px;
+    background:var(--card-bg);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow: 0 3px 0 rgba(43,53,96,0.18);
+  }
+  .lock-icon svg{ width:16px; height:16px; }
+
+  .node-label{
+    text-align:center;
+  }
+  .node-week{
+    font-size:13px;
+    font-weight:700;
+    color:var(--ink-soft);
+    line-height:1.2;
+  }
+  .node-title{
+    font-size:13.5px;
+    font-weight:700;
+    color:var(--ink);
+    line-height:1.25;
+    max-width:118px;
+  }
+  .node.locked .node-week,
+  .node.locked .node-title{ color:var(--locked-ink); }
+
+  .start-flag{
+    position:absolute;
+    top:-46px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:30px;
+    animation:float 5s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce){ .start-flag{ animation:none; } }
+
+  .finish-banner{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    margin-top:8px;
+    font-family:'Baloo 2', sans-serif;
+    color:var(--ink-soft);
+    font-weight:700;
+    text-align:center;
+  }
+  .finish-banner .chest{ font-size:44px; }
+
+  /* ---------- modal ---------- */
+  .overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(15,20,40,0.55);
+    backdrop-filter: blur(2px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:50;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease;
+  }
+  .overlay.open{ opacity:1; pointer-events:auto; }
+
+  .panel{
+    background:var(--card-bg);
+    border-radius:28px;
+    max-width:480px;
+    width:100%;
+    padding:28px 26px 26px;
+    box-shadow: 0 20px 0 rgba(0,0,0,0.12), 0 30px 60px rgba(0,0,0,0.25);
+    transform: translateY(18px) scale(0.97);
+    transition: transform .22s ease;
+  }
+  .overlay.open .panel{ transform:translateY(0) scale(1); }
+
+  .panel-top{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:6px;
+  }
+  .panel-badge{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:800;
+    font-size:13px;
+    padding:6px 14px;
+    border-radius:999px;
+    color:#fff;
+    background:var(--bubble-base, var(--c-teal));
+  }
+  .panel-close{
+    border:none;
+    background:rgba(43,53,96,0.08);
+    color:var(--ink);
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    font-size:18px;
+    line-height:1;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .panel-close:hover{ background:rgba(43,53,96,0.16); }
+
+  .panel h2{
+    font-family:'Baloo 2', sans-serif;
+    font-size:24px;
+    font-weight:800;
+    margin:14px 0 4px;
+    color:var(--ink);
+  }
+  .panel .panel-week{
+    font-weight:700;
+    color:var(--ink-soft);
+    font-size:14px;
+    margin:0 0 18px;
+  }
+
+  .video-slot{
+    aspect-ratio:16/9;
+    width:100%;
+    border-radius:18px;
+    border:3px dashed var(--locked-fill);
+    background:repeating-linear-gradient(135deg, rgba(43,53,96,0.03) 0 12px, rgba(43,53,96,0.06) 12px 24px);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    color:var(--ink-soft);
+    text-align:center;
+    padding:16px;
+  }
+  .video-slot .play-glyph{
+    width:52px;
+    height:52px;
+    border-radius:50%;
+    background:var(--bubble-base, var(--c-teal));
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+  }
+  .video-slot p{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:15px;
+    margin:0;
+  }
+
+  .panel-footer{
+    margin-top:20px;
+    display:flex;
+    justify-content:flex-end;
+  }
+  .btn-primary{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:15px;
+    color:#fff;
+    background:var(--bubble-base, var(--c-teal));
+    border:none;
+    padding:12px 24px;
+    border-radius:14px;
+    cursor:pointer;
+    box-shadow: 0 5px 0 var(--bubble-dark, var(--c-teal-dark));
+  }
+  .btn-primary:active{
+    transform:translateY(3px);
+    box-shadow:none;
+  }
+
+  footer{
+    text-align:center;
+    padding:20px 20px 40px;
+    color:var(--ink-soft);
+    font-size:13px;
+    font-weight:600;
+    position:relative;
+    z-index:2;
+  }
+</style>
+</head>
+<body>
+
+<div class="cloud" style="width:140px;height:70px;top:60px;left:6%;"></div>
+<div class="cloud" style="width:100px;height:52px;top:120px;right:8%;"></div>
+<div class="cloud" style="width:80px;height:42px;top:20px;left:40%;"></div>
+<span class="spark" style="top:180px;left:10%;">✦</span>
+<span class="spark" style="top:340px;right:12%; animation-delay:1.2s;">✧</span>
+<span class="spark" style="top:560px;left:8%; animation-delay:2.4s;">✦</span>
+
+<header>
+  <span class="eyebrow-badge">🧭 Prototipo interactivo</span>
+  <h1>El sendero de la<span>ética profesional</span></h1>
+  <p>Avanza semana a semana y desbloquea cada parada del camino para aprender los valores que construyen tu carácter profesional.</p>
+
+  <div class="progress-wrap">
+    <div class="progress-label"><span>Tu avance</span><span id="progressText">1 de 8 semanas</span></div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+</header>
+
+<div class="path-region">
+  <svg id="pathSvg"><path id="pathLine" fill="none" stroke="var(--path-line)" stroke-width="6" stroke-linecap="round" stroke-dasharray="2 22"/></svg>
+  <div class="nodes-col" id="nodesCol"></div>
+
+  <div class="finish-banner">
+    <span class="chest">🏆</span>
+    <span>Meta: profesional íntegro</span>
+  </div>
+</div>
+
+<footer>Victor Omar Gómez Carrascosa — Manual Ético · Prototipo de aprendizaje gamificado</footer>
+
+<div class="overlay" id="overlay">
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="panelTitle">
+    <div class="panel-top">
+      <span class="panel-badge" id="panelBadge">Semana 1</span>
+      <button class="panel-close" id="panelClose" aria-label="Cerrar">✕</button>
+    </div>
+    <h2 id="panelTitle">Título de la lección</h2>
+    <p class="panel-week" id="panelSub">Semana 1 · Lección desbloqueada</p>
+
+    <div class="video-slot">
+      <div class="play-glyph">▶</div>
+      <p>Inserta tu video de ética aquí</p>
+    </div>
+
+    <div class="panel-footer">
+      <button class="btn-primary" id="panelCloseBtn">Volver al sendero</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const weeks = [
+    { week: "Semana 1", title: "¿Qué es la ética profesional?", unlocked: true,  align:"center", color:"teal"   },
+    { week: "Semana 2", title: "Valores que definen tu carácter", unlocked: false, align:"right",  color:"coral"  },
+    { week: "Semana 3", title: "Honestidad y responsabilidad", unlocked: false, align:"left",   color:"sun"    },
+    { week: "Semana 4", title: "Toma de decisiones responsables", unlocked: false, align:"right",  color:"purple" },
+    { week: "Semana 5", title: "Ética en el trabajo en equipo", unlocked: false, align:"left",   color:"sky"    },
+    { week: "Semana 6", title: "Confidencialidad y confianza", unlocked: false, align:"right",  color:"pink"   },
+    { week: "Semana 7", title: "Dilemas éticos reales", unlocked: false, align:"left",   color:"green"  },
+    { week: "Semana 8", title: "Construyendo una cultura ética", unlocked: false, align:"center", color:"teal"   },
+  ];
+
+  const colorMap = {
+    teal:   { base:"var(--c-teal)",   dark:"var(--c-teal-dark)",   light:"#7fe0d2" },
+    coral:  { base:"var(--c-coral)",  dark:"var(--c-coral-dark)",  light:"#ffb3b3" },
+    sun:    { base:"var(--c-sun)",    dark:"var(--c-sun-dark)",    light:"#ffd873" },
+    purple: { base:"var(--c-purple)", dark:"var(--c-purple-dark)", light:"#c6b6f0" },
+    sky:    { base:"var(--c-sky)",    dark:"var(--c-sky-dark)",    light:"#a9d6ff" },
+    pink:   { base:"var(--c-pink)",   dark:"var(--c-pink-dark)",   light:"#ffb2d4" },
+    green:  { base:"var(--c-green)",  dark:"var(--c-green-dark)",  light:"#a6ecc2" },
+  };
+
+  const nodesCol = document.getElementById('nodesCol');
+
+  weeks.forEach((w, i) => {
+    const row = document.createElement('div');
+    row.className = `node-row align-${w.align}`;
+
+    const btn = document.createElement('button');
+    btn.className = `node ${w.unlocked ? 'unlocked' : 'locked'}`;
+    btn.dataset.index = i;
+    btn.setAttribute('aria-label', w.unlocked ? `${w.week}: ${w.title}. Toca para abrir la lección.` : `${w.week}: bloqueada`);
+
+    const c = colorMap[w.color];
+    if (w.unlocked) {
+      btn.style.setProperty('--bubble-base', c.base);
+      btn.style.setProperty('--bubble-dark', c.dark);
+      btn.style.setProperty('--bubble-light', c.light);
+      btn.style.setProperty('--bubble-shadow', `0 8px 0 ${c.dark}`);
+    }
+
+    btn.innerHTML = `
+      <div class="bubble">
+        ${i === 0 ? '<span class="start-flag">🚩</span>' : ''}
+        ${w.unlocked ? '<div class="ring"></div>' : ''}
+        <span>${i + 1}</span>
+        ${!w.unlocked ? `<span class="lock-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M6 10V8a6 6 0 0 1 12 0v2" stroke="#4a5578" stroke-width="2.2" stroke-linecap="round"/><rect x="4.5" y="10" width="15" height="10" rx="3" fill="#4a5578"/></svg></span>` : ''}
+      </div>
+      <div class="node-label">
+        <div class="node-week">${w.week}</div>
+        <div class="node-title">${w.title}</div>
+      </div>
+    `;
+
+    if (w.unlocked) {
+      btn.addEventListener('click', () => openPanel(i));
+    } else {
+      btn.disabled = false; // keep focusable for accessibility, but non-actionable
+      btn.addEventListener('click', () => {
+        btn.animate(
+          [{ transform: 'translateX(0)' }, { transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' }, { transform: 'translateX(0)' }],
+          { duration: 260, easing: 'ease-in-out' }
+        );
+      });
+    }
+
+    row.appendChild(btn);
+    nodesCol.appendChild(row);
+  });
+
+  // ---- draw winding path through node centers ----
+  const svg = document.getElementById('pathSvg');
+  const pathLine = document.getElementById('pathLine');
+  const region = document.querySelector('.path-region');
+
+  function drawPath(){
+    const regionRect = region.getBoundingClientRect();
+    svg.setAttribute('width', regionRect.width);
+    svg.setAttribute('height', regionRect.height);
+    svg.setAttribute('viewBox', `0 0 ${regionRect.width} ${regionRect.height}`);
+
+    const bubbles = document.querySelectorAll('.node .bubble');
+    const points = Array.from(bubbles).map(b => {
+      const r = b.getBoundingClientRect();
+      return {
+        x: r.left + r.width / 2 - regionRect.left,
+        y: r.top + r.height / 2 - regionRect.top
+      };
+    });
+
+    if (points.length < 2) return;
+
+    let d = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i];
+      const p1 = points[i + 1];
+      const midY = (p0.y + p1.y) / 2;
+      d += ` C ${p0.x} ${midY}, ${p1.x} ${midY}, ${p1.x} ${p1.y}`;
+    }
+    pathLine.setAttribute('d', d);
+  }
+
+  window.addEventListener('load', drawPath);
+  window.addEventListener('resize', () => requestAnimationFrame(drawPath));
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(drawPath);
+  }
+
+  // ---- modal ----
+  const overlay = document.getElementById('overlay');
+  const panelBadge = document.getElementById('panelBadge');
+  const panelTitle = document.getElementById('panelTitle');
+  const panelSub = document.getElementById('panelSub');
+  const panel = document.querySelector('.panel');
+  let lastFocused = null;
+
+  function openPanel(i){
+    const w = weeks[i];
+    const c = colorMap[w.color];
+    panel.style.setProperty('--bubble-base', c.base);
+    panel.style.setProperty('--bubble-dark', c.dark);
+    panelBadge.textContent = w.week;
+    panelTitle.textContent = w.title;
+    panelSub.textContent = `${w.week} · Lección desbloqueada`;
+    lastFocused = document.activeElement;
+    overlay.classList.add('open');
+    document.getElementById('panelCloseBtn').focus();
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closePanel(){
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    if (lastFocused) lastFocused.focus();
+  }
+
+  document.getElementById('panelClose').addEventListener('click', closePanel);
+  document.getElementById('panelCloseBtn').addEventListener('click', closePanel);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closePanel(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && overlay.classList.contains('open')) closePanel(); });
+</script>
+</body>
+</html>
